@@ -15,11 +15,17 @@ struct Customer {
     int in;
     int out;
 
+    int length();
     friend std::istream& operator>>(std::istream& input, Customer& data);
     friend std::ostream& operator<<(std::ostream& output, Customer& data);
     bool operator<(const Customer& other) const;
     bool operator>(const Customer& other) const;
 };
+
+int Customer::length()
+{
+    return out - in;
+}
 
 std::istream& operator>>(std::istream& input, Customer& data)
 {
@@ -35,20 +41,20 @@ std::ostream& operator<<(std::ostream& output, Customer& data)
 
 bool Customer::operator<(const Customer& other) const
 {
-    if (in != other.in) {
-        return in < other.in;
+    if (out != other.out) {
+        return out < other.out;
     }
     else {
-        return out < other.out;
+        return in > other.in;
     }
 }
 bool Customer::operator>(const Customer& other) const
 {
-    if (in != other.in) {
-        return in > other.in;
+    if (out != other.out) {
+        return out > other.out;
     }
     else {
-        return out > other.out;
+        return in < other.in;
     }
 }
 
@@ -163,17 +169,63 @@ void sort(T* data, size_t size)
     }
 }
 
+size_t get_result(Customer* data, size_t size)
+{
+    // data is sorted by time out
+    // data with equal time in is sorted by time in
+
+    //empty array
+    if (size == 0) {
+        return 0;
+    }
+
+    //not empty array
+    size_t result = 2;
+
+    //place two points
+    int right_point = data[0].out;
+    int left_point = right_point - 1;
+
+    for (size_t pos = 1; pos != size; ++pos) {
+        //if both points inside
+        if (left_point >= data[pos].in && right_point <= data[pos].out) {
+        }
+        //if only one point inside
+        else if (right_point >= data[pos].in && right_point <= data[pos].out) {
+            left_point = right_point;
+            right_point = data[pos].out;
+            result += 1;
+        }
+        //if no points inside
+        else {
+            right_point = data[pos].out;
+            left_point = right_point - 1;
+            result += 2;
+        }
+    }
+
+
+    return result;
+}
+
 int main(void)
 {
     size_t number = 0;
     std::cin >> number;
+
+    if (number < 1) {
+        std::cout << 0;
+        return 0;
+    }
     Customer* data = new Customer[number];
     my::read_array(data, number, std::cin);
 
     build(data, number);
     sort(data, number);
 
+    size_t result = get_result(data, number);
 
+    std::cout << result;
 
     delete[] data;
     return 0;
